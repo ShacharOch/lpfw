@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "sha256/sha256.h"
 
-string get_uid() {
+string RulesList::get_uid() {
     static const char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -17,8 +17,7 @@ string get_uid() {
 }
 
 
-RulesList::RulesList(vector<rule> newrules)
-{
+RulesList::RulesList(vector<rule> newrules){
   rules_mutex = PTHREAD_MUTEX_INITIALIZER;
   ctmark_count = 0;
   ctmark_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -82,7 +81,7 @@ ruleslist_rv RulesList::add ( const string path, const string pid, const string 
   //make sure it's not a duplicate rule
   for(int i=0; i < rules.size(); i++){
     if (rules[i].path == path && rules[i].pid == pid){
-      cout << "path " << path << " pid " << pid;
+      cout << "Duplicate: path " << path << " pid " << pid << endl;
       _pthread_mutex_unlock ( &rules_mutex );
       rv.success = false;
       rv.errormsg = "Duplicate rules not allowed";
@@ -91,23 +90,18 @@ ruleslist_rv RulesList::add ( const string path, const string pid, const string 
   }
   if (newrule.is_active){
     newrule.pidfdpath = path_to_proc + newrule.pid + "/fd/";
-    newrule.dirstream = _opendir (newrule.pidfdpath.c_str());
-    try {
-      newrule.dirstream = _opendir (newrule.pidfdpath.c_str());
-    } catch(...) {
+    DIR* o = opendir (newrule.pidfdpath.c_str());
+    //we want to add the rule even though the process may have terminated
+    newrule.dirstream = o;
+    if (o == NULL){
       if (perms == ALLOW_ONCE || perms == DENY_ONCE){
         _pthread_mutex_unlock ( &rules_mutex );
         rv.success = false;
         rv.errormsg = "Rule with perms ONCE terminated";
         return rv;
       }
-      else {
-        //we still want to add the rule even though the process terminated
-        newrule.dirstream = NULL;
-      }
     }
   }
-
   rules.push_back(newrule);
   _pthread_mutex_unlock ( &rules_mutex );
   rv.ctmark = newrule.ctmark_out;
@@ -121,7 +115,7 @@ ruleslist_rv RulesList::remove (const string path, const string perms, const str
 
   bool bRulesChanged = false;
   ruleslist_rv rv;
-  vector<u_int32_t> ctmarks;
+  vector<ctmarks> vctm;
 
   _pthread_mutex_lock ( &rules_mutex );
 
@@ -135,13 +129,12 @@ ruleslist_rv RulesList::remove (const string path, const string perms, const str
       return rv;
     }
     if (rules[i].is_active) {
-      try {
-      _closedir (rules[i].dirstream);
-      } catch(...) {
-        //noop: the process terminated abruptly
-      }
-      ctmarks.push_back(rules[i].ctmark_in);
-      ctmarks.push_back(rules[i].ctmark_out);
+      //doesnt matter if closedir returns an error
+      closedir (rules[i].dirstream);
+      ctmarks c;
+      c.in = rules[i].ctmark_in;
+      c.out = rules[i].ctmark_out;
+      vctm.push_back(c);
     }
 
     rules.erase(rules.begin()+i);
@@ -157,7 +150,7 @@ ruleslist_rv RulesList::remove (const string path, const string perms, const str
   }
   else {
     rv.success = true;
-    rv.ctmarks_to_delete = ctmarks;
+    rv.ctmarks_to_delete = vctm;
     return rv;
   }
 }
@@ -186,7 +179,7 @@ ruleslist_rv RulesList::mark_inactive(string path, string pid){
   bool bRuleFound = false;
   ruleslist_rv rv;
 
-  _pthread_mutex_lock ( &ctmark_mutex );
+  _pthread_mutex_lock ( &rules_mutex );
   for(int i=0; i < rules.size(); i++){
     if (rules[i].path != path) continue;
     if (rules[i].pid != pid ) continue;
@@ -199,7 +192,7 @@ ruleslist_rv RulesList::mark_inactive(string path, string pid){
     rules[i].ctmark_out = c.out;
     break;
   }
-  _pthread_mutex_unlock ( &ctmark_mutex );
+  _pthread_mutex_unlock ( &rules_mutex );
 
   if (!bRuleFound){
     rv.success = false;
@@ -220,19 +213,24 @@ ruleslist_rv RulesList::mark_inactive(string path, string pid){
 //HOWEVER!!! what if an ALWAYS proc is inactive and another instance of it is
 //started. You will have 2 inactive rules!!!
 ruleslist_rv RulesList::mark_active(string path, string newpid, unsigned long long newstime){
-  _pthread_mutex_lock ( &ctmark_mutex );
   bool bRuleFound = false;
   ruleslist_rv rv;
   u_int32_t ctmark;
 
+  _pthread_mutex_lock ( &rules_mutex );
   for(int i=0; i < rules.size(); i++){
     if (rules[i].path != path) continue;
     bRuleFound = true;
-    assert(! rules[i].is_active);
+    if(rules[i].is_active){
+      _pthread_mutex_unlock ( &rules_mutex );
+      rv.success = false;
+      rv.errormsg = "Cannot mark active a process which is already active";
+      return rv;
+    }
     string pidfdpath = path_to_proc + newpid + "/fd/";
     DIR *dirstream = opendir(pidfdpath.c_str());
     if (dirstream == NULL) {
-      _pthread_mutex_unlock ( &ctmark_mutex );
+      _pthread_mutex_unlock ( &rules_mutex );
       rv.success = false;
       rv.errormsg = "Process terminated abruptly when marking it as active";
       return rv;
@@ -248,10 +246,10 @@ ruleslist_rv RulesList::mark_active(string path, string newpid, unsigned long lo
     }
     ctmark = rules[i].ctmark_out;
   }
-  _pthread_mutex_unlock ( &ctmark_mutex );
+  _pthread_mutex_unlock ( &rules_mutex );
   if (!bRuleFound){
     rv.success = false;
-    rv.errormsg = "Failed to find rule while marking active";
+    rv.errormsg = "Failed to find rule in mark_active";
     return rv;
   }
   else {

@@ -8,27 +8,27 @@
 
 using namespace std;
 
-//return values for all member functions
-//not all fields are used by each function
-struct ruleslist_rv{
-  bool success;
-  uint32_t ctmark;
-  vector<uint32_t> ctmarks_to_delete;
-  string errormsg;
-};
-
-
 //conntrack marks
 struct ctmarks{
   uint32_t in;
   uint32_t out;
 };
 
+//return values for all member functions
+//not all fields are used by each function
+struct ruleslist_rv{
+  bool success;
+  uint32_t ctmark;
+  vector<ctmarks> ctmarks_to_delete;
+  string errormsg;
+};
 
 
 
 class RulesList
 {
+friend class RulesListFriend;
+
 public:
   RulesList(vector<rule> newrules);
   ruleslist_rv add ( const string path, const string pid, const string perms,
@@ -42,11 +42,12 @@ public:
 private:
   ctmarks get_ctmarks();
   string get_sha256_hexdigest(string exe_path);
+  string get_uid();
   vector<rule> rules;
   pthread_mutex_t rules_mutex;
   u_int32_t ctmark_count;
   pthread_mutex_t ctmark_mutex;
-  string path_to_proc = "/proc/"; //can be changed for unittesting
+  string path_to_proc = "/proc/"; //unittests change this to from /proc/ to /tmp/
 };
 
 #endif // RULESLIST_H
