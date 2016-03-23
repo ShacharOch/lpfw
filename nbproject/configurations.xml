@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="97">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="argtable">
+        <in>arg_end.c</in>
+        <in>arg_file.c</in>
+        <in>arg_int.c</in>
+        <in>arg_lit.c</in>
+        <in>arg_rem.c</in>
+        <in>arg_str.c</in>
+        <in>argtable2.c</in>
+        <in>argtable2.h</in>
+      </df>
+      <df name="common">
+        <in>defines.h</in>
+        <in>includes.h</in>
+        <in>syscall_wrappers.h</in>
+      </df>
+      <df name="sha256">
+        <in>sha256.c</in>
+        <in>sha256.h</in>
+      </df>
+      <in>base64.cpp</in>
+      <in>base64.h</in>
+      <in>conntrack.c</in>
+      <in>conntrack.h</in>
+      <in>lpfw.cpp</in>
+      <in>lpfw.h</in>
+      <in>testmain.cpp</in>
+      <in>testprocess.cpp</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath>lpfw</executablePath>
+          <cTool>
+            <standard>10</standard>
+          </cTool>
+          <ccTool>
+            <standard>8</standard>
+          </ccTool>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="argtable/arg_end.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/arg_file.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/arg_int.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/arg_lit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/arg_rem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/arg_str.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/argtable2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="argtable/argtable2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="base64.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="base64.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common/defines.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common/includes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common/syscall_wrappers.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="conntrack.c" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="conntrack.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <folder path="0/argtable">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/sha256">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <item path="lpfw.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lpfw.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sha256/sha256.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="sha256/sha256.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="testmain.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="testprocess.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
